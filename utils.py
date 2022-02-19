@@ -8,24 +8,33 @@ import matplotlib.pyplot as plt
 class SmilesDataset(Dataset):
     def __init__(self, dataset_path):
         self.data = []
+        # Positive examples
+        dir = os.fsencode(dataset_path + '/positives/positives7/')
+        for file in os.listdir(dir):
+            image = Image.open(dataset_path + '/positives/positives7/' + (file.strip()).decode("utf-8"))
+            transform = transforms.Compose(
+                        [transforms.RandomHorizontalFlip(),
+                        transforms.ColorJitter(brightness = 0.5),
+                        transforms.RandomCrop((64, 64)),
+                        transforms.ToTensor()])
+            tensor = transform(image)
 
+            self.data.append((tensor, 1))
+
+        num_positives = len(self.data)
+        num_negatives = 0
         # Negative examples
         with open(dataset_path + '/negatives/smiles_01_neg.idx') as file:
             for line in file:
+                if num_negatives > num_positives:
+                    break 
+
                 image = Image.open(dataset_path + '/negatives/' + line.strip())
                 transform = transforms.ToTensor()
                 tensor = transform(image)
 
                 self.data.append((tensor, 0))
-        
-        # Positive examples
-        dir = os.fsencode(dataset_path + '/positives/positives7/')
-        for file in os.listdir(dir):
-            image = Image.open(dataset_path + '/positives/positives7/' + (file.strip()).decode("utf-8"))
-            transform = transforms.ToTensor()
-            tensor = transform(image)
-
-            self.data.append((tensor, 1))
+                num_negatives += 1
         
     def __len__(self):
         return len(self.data)
