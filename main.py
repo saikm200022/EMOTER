@@ -10,38 +10,30 @@
 import cv2
 import torch
 from torchvision import transforms
-from models import SmileDetector
+from models import SmileDetector, FaceObjDetector
 from train import load_model, assess_accuracy
 from PIL import Image
 
-# define a video capture object
 vid = cv2.VideoCapture(0)
 
 model = SmileDetector()
 model = load_model('RES8.th')
-# print("ACCURACY: ", assess_accuracy(model))
+detector = FaceObjDetector()
+
 while(True):
-    # Capture the video frame
-    # by frame
     ret, frame = vid.read()
-    cv2.imshow('frame', frame)
     cv2.imwrite("frame.jpg", frame)
     image = Image.open("frame.jpg")
     transform = transforms.Compose([transforms.CenterCrop((64, 64)), transforms.Grayscale(1), transforms.ToTensor()])
     tensor = transform(image)
     label = model(tensor[None, :, :, :].float())
-    print(label)
+    text = "SMILING :)"
     if label.argmax() == 0:
-        print("NOT SMILING *** : (")
-    
-    else:
-        print("SMILING *** : )")
+        text = "NOT SMILING :("
+    frame = detector.obj_detect(frame)
+    display = cv2.putText(frame, text, (100, 100), cv2.FONT_HERSHEY_COMPLEX, fontScale=1, thickness =3, color = (0,0,0))
+    cv2.imshow("EMOTER", display)
 
-    # Display the resulting frame
-      
-    # the 'q' button is set as the
-    # quitting button you may use any1
-    # desired button of your choice
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
