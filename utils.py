@@ -59,3 +59,4 @@ def viz_data(dataloader):
 
 obj = SmilesDataset('./data/SMILEs')
 assert len(obj) > 0, "Dataset is empty!"
+# viz_data(load_data('./data/SMILEs'))
