@@ -17,7 +17,7 @@ from PIL import Image
 vid = cv2.VideoCapture(0)
 
 model = SmileDetector()
-model = load_model('RES8.th')
+model = load_model('./model_checkpoint/model.th')
 detector = FaceObjDetector()
 
 while(True):
